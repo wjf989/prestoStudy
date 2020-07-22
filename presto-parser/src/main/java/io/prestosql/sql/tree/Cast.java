@@ -29,6 +29,8 @@ public final class Cast
     private final boolean safe;
     private final boolean typeOnly;
 
+
+
     public Cast(Expression expression, DataType type)
     {
         this(Optional.empty(), expression, type, false, false);

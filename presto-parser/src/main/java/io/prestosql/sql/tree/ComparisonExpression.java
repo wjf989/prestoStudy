@@ -25,8 +25,10 @@ public class ComparisonExpression
         extends Expression
 {
     private final Operator operator;
-    private final Expression left;
-    private final Expression right;
+//    private final Expression left;
+//    private final Expression right;
+    private Expression left;
+    private Expression right;
 
     public ComparisonExpression(Operator operator, Expression left, Expression right)
     {
@@ -63,6 +65,17 @@ public class ComparisonExpression
     public Expression getRight()
     {
         return right;
+    }
+
+    //2020-5-18 new add setLeft and setRight
+    public void setLeft(Expression left) {
+        requireNonNull(left, "lef is null");
+        this.left = left;
+    }
+
+    public void setRight(Expression right) {
+        requireNonNull(right,"right is null");
+        this.right = right;
     }
 
     @Override

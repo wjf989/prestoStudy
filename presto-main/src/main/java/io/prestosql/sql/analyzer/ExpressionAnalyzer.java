@@ -34,77 +34,11 @@ import io.prestosql.spi.ErrorCodeSupplier;
 import io.prestosql.spi.PrestoException;
 import io.prestosql.spi.PrestoWarning;
 import io.prestosql.spi.function.OperatorType;
-import io.prestosql.spi.type.CharType;
-import io.prestosql.spi.type.DecimalParseResult;
-import io.prestosql.spi.type.Decimals;
-import io.prestosql.spi.type.RowType;
-import io.prestosql.spi.type.Type;
-import io.prestosql.spi.type.TypeNotFoundException;
-import io.prestosql.spi.type.TypeSignatureParameter;
-import io.prestosql.spi.type.VarcharType;
+import io.prestosql.spi.type.*;
 import io.prestosql.sql.parser.SqlParser;
 import io.prestosql.sql.planner.Symbol;
 import io.prestosql.sql.planner.TypeProvider;
-import io.prestosql.sql.tree.ArithmeticBinaryExpression;
-import io.prestosql.sql.tree.ArithmeticUnaryExpression;
-import io.prestosql.sql.tree.ArrayConstructor;
-import io.prestosql.sql.tree.AtTimeZone;
-import io.prestosql.sql.tree.BetweenPredicate;
-import io.prestosql.sql.tree.BinaryLiteral;
-import io.prestosql.sql.tree.BindExpression;
-import io.prestosql.sql.tree.BooleanLiteral;
-import io.prestosql.sql.tree.Cast;
-import io.prestosql.sql.tree.CharLiteral;
-import io.prestosql.sql.tree.CoalesceExpression;
-import io.prestosql.sql.tree.ComparisonExpression;
-import io.prestosql.sql.tree.CurrentPath;
-import io.prestosql.sql.tree.CurrentTime;
-import io.prestosql.sql.tree.CurrentUser;
-import io.prestosql.sql.tree.DecimalLiteral;
-import io.prestosql.sql.tree.DereferenceExpression;
-import io.prestosql.sql.tree.DoubleLiteral;
-import io.prestosql.sql.tree.ExistsPredicate;
-import io.prestosql.sql.tree.Expression;
-import io.prestosql.sql.tree.Extract;
-import io.prestosql.sql.tree.FieldReference;
-import io.prestosql.sql.tree.Format;
-import io.prestosql.sql.tree.FunctionCall;
-import io.prestosql.sql.tree.GenericLiteral;
-import io.prestosql.sql.tree.GroupingOperation;
-import io.prestosql.sql.tree.Identifier;
-import io.prestosql.sql.tree.IfExpression;
-import io.prestosql.sql.tree.InListExpression;
-import io.prestosql.sql.tree.InPredicate;
-import io.prestosql.sql.tree.IntervalLiteral;
-import io.prestosql.sql.tree.IsNotNullPredicate;
-import io.prestosql.sql.tree.IsNullPredicate;
-import io.prestosql.sql.tree.LambdaArgumentDeclaration;
-import io.prestosql.sql.tree.LambdaExpression;
-import io.prestosql.sql.tree.LikePredicate;
-import io.prestosql.sql.tree.LogicalBinaryExpression;
-import io.prestosql.sql.tree.LongLiteral;
-import io.prestosql.sql.tree.Node;
-import io.prestosql.sql.tree.NodeRef;
-import io.prestosql.sql.tree.NotExpression;
-import io.prestosql.sql.tree.NullIfExpression;
-import io.prestosql.sql.tree.NullLiteral;
-import io.prestosql.sql.tree.Parameter;
-import io.prestosql.sql.tree.QualifiedName;
-import io.prestosql.sql.tree.QuantifiedComparisonExpression;
-import io.prestosql.sql.tree.Row;
-import io.prestosql.sql.tree.SearchedCaseExpression;
-import io.prestosql.sql.tree.SimpleCaseExpression;
-import io.prestosql.sql.tree.SortItem;
-import io.prestosql.sql.tree.StackableAstVisitor;
-import io.prestosql.sql.tree.StringLiteral;
-import io.prestosql.sql.tree.SubqueryExpression;
-import io.prestosql.sql.tree.SubscriptExpression;
-import io.prestosql.sql.tree.SymbolReference;
-import io.prestosql.sql.tree.TimeLiteral;
-import io.prestosql.sql.tree.TimestampLiteral;
-import io.prestosql.sql.tree.TryExpression;
-import io.prestosql.sql.tree.WhenClause;
-import io.prestosql.sql.tree.WindowFrame;
+import io.prestosql.sql.tree.*;
 import io.prestosql.type.FunctionType;
 import io.prestosql.type.TypeCoercion;
 
@@ -505,6 +439,23 @@ public class ExpressionAnalyzer
         @Override
         protected Type visitComparisonExpression(ComparisonExpression node, StackableAstVisitorContext<Context> context)
         {
+            Type left = process(node.getLeft(), context);
+            Type right = process(node.getRight(), context);
+            System.out.println("left type is "+left.getDisplayName());
+            System.out.println("right type is "+right.getDisplayName());
+
+            String leftTypeName = left.getDisplayName();
+            String rightTypeName = right.getDisplayName();
+
+            if(leftTypeName.equals("Varchar") && !rightTypeName.equals("Varchar")){
+                Cast cast = new Cast(node.getRight(),(DataType)DoubleType.DOUBLE.getDisplayName());
+                node.setRight(cast);
+                process(cast,context);
+            }else if (!leftTypeName.equals("Varchar") && rightTypeName.equals("Varchar")){
+
+            }
+
+//            if(left.getDisplayName().toUpperCase()=="VARCHAR" && right.getDisplayName())
             OperatorType operatorType = OperatorType.valueOf(node.getOperator().name());
             return getOperator(context, node, operatorType, node.getLeft(), node.getRight());
         }

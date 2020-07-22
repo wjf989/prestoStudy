@@ -40,7 +40,6 @@ import static io.prestosql.spi.security.AccessDeniedException.denyDropColumn;
 import static io.prestosql.spi.security.AccessDeniedException.denyDropTable;
 import static io.prestosql.spi.security.AccessDeniedException.denyRenameColumn;
 import static io.prestosql.spi.security.AccessDeniedException.denyRenameTable;
-import static java.lang.String.format;
 import static java.util.Objects.requireNonNull;
 
 public class LegacyAccessControl
@@ -128,10 +127,10 @@ public class LegacyAccessControl
         if (target.isEmpty()) {
             denyDropTable(tableName.toString(), "Table not found");
         }
-
-        if (!context.getIdentity().getUser().equals(target.get().getOwner())) {
-            denyDropTable(tableName.toString(), format("Owner of the table ('%s') is different from session user ('%s')", target.get().getOwner(), context.getIdentity().getUser()));
-        }
+        //2020-5-18 Unregister the judgment code
+//        if (!context.getIdentity().getUser().equals(target.get().getOwner())) {
+//            denyDropTable(tableName.toString(), format("Owner of the table ('%s') is different from session user ('%s')", target.get().getOwner(), context.getIdentity().getUser()));
+//        }
     }
 
     @Override
